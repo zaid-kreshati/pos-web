@@ -22,7 +22,7 @@ export const InvoiceForm: React.FC = () => {
     handleSubmit,
     watch,
     control,
-    formState: { errors },
+    formState,
     reset,
   } = useForm<InvoiceFormSchema>({
     resolver: zodResolver(invoiceFormSchema),
@@ -38,14 +38,24 @@ export const InvoiceForm: React.FC = () => {
     },
   });
 
+  const { errors } = formState;
   const invoiceItems = watch('invoice_items');
-  const subtotal = watch('subtotal');
-  const tax = watch('tax');
-  const total = watch('total');
 
   // Calculate totals from items
   const calculatedSubtotal =
     invoiceItems?.reduce((sum, item) => sum + (item.quantity * item.unit_price || 0), 0) || 0;
+
+  const getErrorMessage = (error: unknown) => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String(error.message);
+    }
+
+    return 'Failed to create invoice';
+  };
 
   const onSubmit = async (data: InvoiceFormSchema) => {
     setIsSubmitting(true);
@@ -55,8 +65,7 @@ export const InvoiceForm: React.FC = () => {
       addToast(`Invoice created successfully! UUID: ${response.data.uuid}`, 'success');
       reset();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice';
-      addToast(errorMessage, 'error');
+      addToast(getErrorMessage(error), 'error');
     } finally {
       setIsSubmitting(false);
     }

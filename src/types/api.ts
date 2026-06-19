@@ -12,7 +12,7 @@ export interface LoginResponse extends ApiResponse {
       name: string;
       email: string;
     };
-    auth_token: string;
+    token: string;
     role: string;
   };
 }

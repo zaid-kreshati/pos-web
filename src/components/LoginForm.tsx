@@ -27,7 +27,7 @@ export const LoginForm: React.FC = () => {
       await login(data);
       addToast('Logged in successfully!', 'success');
       navigate('/create-invoice');
-    } catch (err) {
+    } catch {
       const errorMessage = error || 'Login failed. Please try again.';
       addToast(errorMessage, 'error');
     }

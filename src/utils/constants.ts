@@ -1,5 +1,7 @@
 // API endpoints
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+export const DEFAULT_POS_API_TOKEN = 'bb7f835441b0dd38083386a6b1feaf48';
+export const POS_API_TOKEN = import.meta.env.VITE_POS_API_TOKEN || DEFAULT_POS_API_TOKEN;
 
 export const ENDPOINTS = {
   AUTH: {
@@ -36,4 +38,4 @@ export const STORAGE_KEYS = {
 export const TOAST_DURATION = 4000;
 
 // Default currency
-export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'EUR';
+export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'جنيه';

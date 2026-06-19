@@ -2,6 +2,16 @@ import axios from 'axios';
 import type { AxiosInstance, AxiosError } from 'axios';
 import { API_BASE_URL, STORAGE_KEYS, ERROR_MESSAGES } from '../utils/constants';
 
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuthRedirect?: boolean;
+  }
+
+  export interface InternalAxiosRequestConfig {
+    skipAuthRedirect?: boolean;
+  }
+}
+
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +24,7 @@ export const apiClient: AxiosInstance = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-    if (token) {
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -29,7 +39,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config?.skipAuthRedirect) {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_INFO);
       window.location.href = '/login';
@@ -43,8 +53,8 @@ apiClient.interceptors.response.use(
     } else if (error.response.status === 422) {
       errorMessage = ERROR_MESSAGES.VALIDATION_ERROR;
     } else if (error.response.data && typeof error.response.data === 'object') {
-      const data = error.response.data as { message?: string };
-      errorMessage = data.message || errorMessage;
+      const data = error.response.data as { message?: string; error?: string };
+      errorMessage = data.message || data.error || errorMessage;
     }
 
     return Promise.reject({

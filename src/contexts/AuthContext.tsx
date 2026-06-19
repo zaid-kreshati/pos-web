@@ -49,7 +49,7 @@ const loadAuthState = (): AuthState => {
         isLoading: false,
         error: null,
       };
-    } catch (e) {
+    } catch {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.USER_INFO);
     }
@@ -88,6 +88,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -97,15 +98,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'LOGIN_START' });
     try {
       const response = await apiClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, data);
-      const { user, auth_token } = response.data.data;
+      const { user, token, role } = response.data.data;
+      const userWithRole = { ...user, role };
 
       // Store in localStorage
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, auth_token);
-      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(user));
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userWithRole));
 
       dispatch({
         type: 'LOGIN_SUCCESS',
-        payload: { user, token: auth_token },
+        payload: { user: userWithRole, token },
       });
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed';
