@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { invoiceFormSchema } from '../utils/validation';
-import type { InvoiceFormSchema } from '../utils/validation';
-import { LineItemsInput } from './LineItemsInput';
-import { LoadingSpinner } from './LoadingSpinner';
-import { useToast } from '../hooks/useToast';
-import { createInvoice } from '../api/invoiceApi';
-import { formatNumber } from '../utils/formatters';
-import { DEFAULT_CURRENCY } from '../utils/constants';
-import { Copy, Check } from 'lucide-react';
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { invoiceFormSchema } from "../utils/validation";
+import type { InvoiceFormSchema } from "../utils/validation";
+import { LineItemsInput } from "./LineItemsInput";
+import { LoadingSpinner } from "./LoadingSpinner";
+import { useToast } from "../hooks/useToast";
+import { createInvoice } from "../api/invoiceApi";
+import { formatNumber } from "../utils/formatters";
+import { DEFAULT_CURRENCY } from "../utils/constants";
+import { Copy, Check } from "lucide-react";
 
 export const InvoiceForm: React.FC = () => {
   const { addToast } = useToast();
@@ -17,44 +17,41 @@ export const InvoiceForm: React.FC = () => {
   const [createdUuid, setCreatedUuid] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    formState,
-    reset,
-  } = useForm<InvoiceFormSchema>({
-    resolver: zodResolver(invoiceFormSchema),
-    defaultValues: {
-      invoice_id: '',
-      subtotal: 0,
-      tax: 0,
-      total: 0,
-      payment_method: 'cash',
-      currency: DEFAULT_CURRENCY,
-      voucher: undefined,
-      invoice_items: [],
-    },
-  });
+  const { register, handleSubmit, setValue, watch, control, formState, reset } =
+    useForm<InvoiceFormSchema>({
+      resolver: zodResolver(invoiceFormSchema),
+      defaultValues: {
+        invoice_id: "",
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+        payment_method: "cash",
+        currency: DEFAULT_CURRENCY,
+        voucher: undefined,
+        invoice_items: [],
+      },
+    });
 
   const { errors } = formState;
-  const invoiceItems = watch('invoice_items');
+  const invoiceItems = watch("invoice_items");
 
   // Calculate totals from items
   const calculatedSubtotal =
-    invoiceItems?.reduce((sum, item) => sum + (item.quantity * item.unit_price || 0), 0) || 0;
+    invoiceItems?.reduce(
+      (sum, item) => sum + (item.quantity * item.unit_price || 0),
+      0,
+    ) || 0;
 
   const getErrorMessage = (error: unknown) => {
     if (error instanceof Error) {
       return error.message;
     }
 
-    if (error && typeof error === 'object' && 'message' in error) {
+    if (error && typeof error === "object" && "message" in error) {
       return String(error.message);
     }
 
-    return 'Failed to create invoice';
+    return "Failed to create invoice";
   };
 
   const onSubmit = async (data: InvoiceFormSchema) => {
@@ -62,10 +59,13 @@ export const InvoiceForm: React.FC = () => {
     try {
       const response = await createInvoice(data);
       setCreatedUuid(response.data.uuid);
-      addToast(`Invoice created successfully! UUID: ${response.data.uuid}`, 'success');
+      addToast(
+        `Invoice created successfully! UUID: ${response.data.uuid}`,
+        "success",
+      );
       reset();
     } catch (error) {
-      addToast(getErrorMessage(error), 'error');
+      addToast(getErrorMessage(error), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -89,13 +89,19 @@ export const InvoiceForm: React.FC = () => {
               <Check className="h-8 w-8 text-green-600" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-green-900 mb-2">Invoice Created Successfully!</h2>
-          <p className="text-green-700 mb-6">Your invoice has been created and NFC tag is being written.</p>
+          <h2 className="text-2xl font-bold text-green-900 mb-2">
+            Invoice Created Successfully!
+          </h2>
+          <p className="text-green-700 mb-6">
+            Your invoice has been created and NFC tag is being written.
+          </p>
 
           <div className="bg-white border border-green-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600 mb-2">Invoice UUID:</p>
             <div className="flex items-center justify-center gap-2">
-              <code className="text-lg font-mono font-bold text-gray-900 break-all">{createdUuid}</code>
+              <code className="text-lg font-mono font-bold text-gray-900 break-all">
+                {createdUuid}
+              </code>
               <button
                 onClick={handleCopyUuid}
                 className="p-2 hover:bg-gray-100 rounded-lg transition"
@@ -124,77 +130,99 @@ export const InvoiceForm: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white rounded-lg shadow p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New Invoice</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Create New Invoice
+        </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Information Section */}
           <section className="border-b border-gray-200 pb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Basic Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Invoice ID */}
               <div>
-                <label htmlFor="invoice_id" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="invoice_id"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Invoice ID *
                 </label>
                 <input
-                  {...register('invoice_id')}
+                  {...register("invoice_id")}
                   type="text"
                   id="invoice_id"
                   placeholder="e.g., INV-2026-001"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.invoice_id ? 'border-red-500' : 'border-gray-300'
+                    errors.invoice_id ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.invoice_id && (
-                  <p className="text-red-600 text-sm mt-1">{errors.invoice_id.message}</p>
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.invoice_id.message}
+                  </p>
                 )}
               </div>
 
               {/* Payment Method */}
               <div>
-                <label htmlFor="payment_method" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="payment_method"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Payment Method *
                 </label>
                 <input
-                  {...register('payment_method')}
+                  {...register("payment_method")}
                   type="text"
                   id="payment_method"
                   placeholder="e.g., cash, card"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.payment_method ? 'border-red-500' : 'border-gray-300'
+                    errors.payment_method ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.payment_method && (
-                  <p className="text-red-600 text-sm mt-1">{errors.payment_method.message}</p>
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.payment_method.message}
+                  </p>
                 )}
               </div>
 
               {/* Currency */}
               <div>
-                <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="currency"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Currency *
                 </label>
                 <input
-                  {...register('currency')}
+                  {...register("currency")}
                   type="text"
                   id="currency"
                   placeholder="EUR"
                   className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.currency ? 'border-red-500' : 'border-gray-300'
+                    errors.currency ? "border-red-500" : "border-gray-300"
                   }`}
                 />
                 {errors.currency && (
-                  <p className="text-red-600 text-sm mt-1">{errors.currency.message}</p>
+                  <p className="text-red-600 text-sm mt-1">
+                    {errors.currency.message}
+                  </p>
                 )}
               </div>
 
               {/* Voucher (optional) */}
               <div>
-                <label htmlFor="voucher" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="voucher"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Voucher / Discount (Optional)
                 </label>
                 <input
-                  {...register('voucher', { valueAsNumber: true })}
+                  {...register("voucher", { valueAsNumber: true })}
                   type="number"
                   id="voucher"
                   step="0.01"
@@ -208,19 +236,31 @@ export const InvoiceForm: React.FC = () => {
 
           {/* Line Items Section */}
           <section className="border-b border-gray-200 pb-8">
-            <LineItemsInput control={control} register={register} watch={watch} formState={formState} />
+            <LineItemsInput
+              control={control}
+              register={register}
+              watch={watch}
+              setValue={setValue}
+              formState={formState}
+            />{" "}
             {errors.invoice_items && (
-              <p className="text-red-600 text-sm mt-2">{errors.invoice_items.message}</p>
+              <p className="text-red-600 text-sm mt-2">
+                {errors.invoice_items.message}
+              </p>
             )}
           </section>
 
           {/* Pricing Section */}
           <section className="bg-gray-50 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Pricing Summary</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Pricing Summary
+            </h3>
 
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700">Subtotal (calculated from items):</span>
+                <span className="text-gray-700">
+                  Subtotal (calculated from items):
+                </span>
                 <span className="text-lg font-semibold text-gray-900">
                   {formatNumber(calculatedSubtotal)}
                 </span>
@@ -231,12 +271,9 @@ export const InvoiceForm: React.FC = () => {
                   Subtotal (manual) *:
                 </label>
                 <input
-                  {...register('subtotal', { valueAsNumber: true })}
-                  type="number"
-                  id="subtotal"
-                  step="0.01"
-                  min="0"
-                  className="w-32 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  {...register("subtotal", { valueAsNumber: true })}
+                  readOnly
+                  className="w-32 px-3 py-1 border border-gray-300 rounded-lg bg-gray-100"
                 />
               </div>
 
@@ -245,7 +282,7 @@ export const InvoiceForm: React.FC = () => {
                   Tax *:
                 </label>
                 <input
-                  {...register('tax', { valueAsNumber: true })}
+                  {...register("tax", { valueAsNumber: true })}
                   type="number"
                   id="tax"
                   step="0.01"
@@ -255,16 +292,16 @@ export const InvoiceForm: React.FC = () => {
               </div>
 
               <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
-                <label htmlFor="total" className="text-lg font-semibold text-gray-900">
+                <label
+                  htmlFor="total"
+                  className="text-lg font-semibold text-gray-900"
+                >
                   Total *:
                 </label>
                 <input
-                  {...register('total', { valueAsNumber: true })}
-                  type="number"
-                  id="total"
-                  step="0.01"
-                  min="0"
-                  className="w-32 px-3 py-2 text-lg font-bold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  {...register("total", { valueAsNumber: true })}
+                  readOnly
+                  className="w-32 px-3 py-2 text-lg font-bold border border-gray-300 rounded-lg bg-gray-100"
                 />
               </div>
             </div>
@@ -287,8 +324,8 @@ export const InvoiceForm: React.FC = () => {
               disabled={isSubmitting}
               className={`flex-1 py-3 px-4 rounded-lg font-medium text-white transition flex items-center justify-center gap-2 ${
                 isSubmitting
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
               }`}
             >
               {isSubmitting ? (
@@ -297,7 +334,7 @@ export const InvoiceForm: React.FC = () => {
                   <span>Creating Invoice...</span>
                 </>
               ) : (
-                'Create Invoice'
+                "Create Invoice"
               )}
             </button>
 

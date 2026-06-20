@@ -15,6 +15,11 @@ export const ENDPOINTS = {
     GET_BY_ID: (id: number) => `/invoices/id/${id}`,
     GET_BY_UUID: (uuid: string) => `/invoices/uuid/${uuid}`,
   },
+
+  PRODUCTS: {
+    LIST: '/products',
+    GET_BY_ID: (id: number) => `/products/id/${id}`,
+  },
 };
 
 // Error messages

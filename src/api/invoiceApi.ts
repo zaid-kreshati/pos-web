@@ -1,7 +1,7 @@
 import apiClient from './client';
 import { ENDPOINTS, POS_API_TOKEN } from '../utils/constants';
 import type { InvoiceFormData } from '../types/forms';
-import type { CreateInvoiceResponse } from '../types/api';
+import type { CreateInvoiceResponse, Product } from '../types/api';
 
 const toInvoicePayload = (data: InvoiceFormData): InvoiceFormData => ({
   ...data,
@@ -33,3 +33,19 @@ export const createInvoice = async (data: InvoiceFormData): Promise<CreateInvoic
 
   return response.data;
 };
+
+export const getProducts = async (): Promise<Product[]> => {
+  const response = await apiClient.get<{ data: Product[] }>(
+    ENDPOINTS.PRODUCTS.LIST,
+    {
+      headers: {
+        Authorization: `Bearer ${POS_API_TOKEN}`,
+      },
+      skipAuthRedirect: true,
+    }
+  );
+
+  return response.data.data;
+};
+
+
