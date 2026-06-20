@@ -22,7 +22,7 @@ export const invoiceFormSchema = z.object({
   tax: z.number().min(0, 'Tax cannot be negative'),
   total: z.number().min(0, 'Total cannot be negative'),
   payment_method: z.string().min(1, 'Payment method is required').max(255),
-  currency: z.string().min(1, 'Currency is required').max(3),
+  currency: z.string().min(1, 'Currency is required').max(255),
   voucher: z.number().optional(),
   invoice_items: z.array(invoiceItemSchema).min(1, 'At least one item is required'),
 });

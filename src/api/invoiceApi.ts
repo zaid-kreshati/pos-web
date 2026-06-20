@@ -28,6 +28,7 @@ export const createInvoice = async (data: InvoiceFormData): Promise<CreateInvoic
         Authorization: `Bearer ${POS_API_TOKEN}`,
       },
       skipAuthRedirect: true,
+      
     }
   );
 

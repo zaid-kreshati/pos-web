@@ -7,7 +7,7 @@ import {
   type UseFormSetValue,
   type FormState,
 } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ShoppingCart } from "lucide-react";
 
 import type { InvoiceFormSchema } from "../utils/validation";
 import { formatNumber } from "../utils/formatters";
@@ -80,9 +80,14 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">
-          Invoice Items
-        </label>
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
+            <ShoppingCart className="w-5 h-5 text-green-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-white">
+            Line Items
+          </h3>
+        </div>
 
         <button
           type="button"
@@ -95,18 +100,18 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
               total: 0,
             })
           }
-          className="flex items-center gap-2 px-3 py-1 text-sm text-white bg-green-600 hover:bg-green-700 rounded-lg transition"
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-xl transition"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="w-4 h-4" />
           Add Item
         </button>
       </div>
 
       {fields.length === 0 && (
-        <p className="text-red-600 text-sm">At least one item is required</p>
+        <p className="text-red-500 text-sm">At least one item is required</p>
       )}
 
-      <div className="space-y-3 overflow-x-auto">
+      <div className="space-y-4">
         {fields.map((field, index) => {
           const quantity = invoiceItems?.[index]?.quantity || 0;
           const unitPrice = invoiceItems?.[index]?.unit_price || 0;
@@ -115,11 +120,11 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
           return (
             <div
               key={field.id}
-              className="border border-gray-200 rounded-lg p-4 space-y-3 bg-gray-50"
+              className="border border-slate-700 rounded-2xl p-5 space-y-4 bg-slate-900"
             >
               {/* Product Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-2">
                   Product
                 </label>
 
@@ -127,7 +132,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                   {...register(`invoice_items.${index}.product_id`, {
                     valueAsNumber: true,
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white transition"
                   onChange={(e) => {
                     const productId = Number(e.target.value);
 
@@ -168,7 +173,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                 />
 
                 {formState.errors.invoice_items?.[index]?.product_name && (
-                  <p className="text-red-600 text-xs mt-1">
+                  <p className="text-red-500 text-xs mt-1.5">
                     {
                       formState.errors.invoice_items[index]?.product_name
                         ?.message
@@ -181,8 +186,8 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Quantity */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Quantity
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Qty
                   </label>
 
                   <input
@@ -191,11 +196,11 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                     })}
                     type="number"
                     min="1"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white transition"
                   />
 
                   {formState.errors.invoice_items?.[index]?.quantity && (
-                    <p className="text-red-600 text-xs mt-1">
+                    <p className="text-red-500 text-xs mt-1.5">
                       {formState.errors.invoice_items[index]?.quantity?.message}
                     </p>
                   )}
@@ -203,8 +208,8 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
 
                 {/* Unit Price */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Unit Price
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Price
                   </label>
 
                   <input
@@ -214,11 +219,11 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                     type="number"
                     min="0"
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white transition"
                   />
 
                   {formState.errors.invoice_items?.[index]?.unit_price && (
-                    <p className="text-red-600 text-xs mt-1">
+                    <p className="text-red-500 text-xs mt-1.5">
                       {
                         formState.errors.invoice_items[index]?.unit_price
                           ?.message
@@ -229,16 +234,15 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
 
                 {/* Total */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
                     Total
                   </label>
 
-                  <input
-                    type="text"
-                    value={formatNumber(total)}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
-                  />
+                  <div className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl flex items-center">
+                    <span className="text-slate-300 font-medium">
+                      ${formatNumber(total)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -256,10 +260,10 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-xl transition"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Remove Item
+                  <Trash2 className="w-4 h-4" />
+                  Remove
                 </button>
               </div>
             </div>

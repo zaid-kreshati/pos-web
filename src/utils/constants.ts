@@ -43,4 +43,4 @@ export const STORAGE_KEYS = {
 export const TOAST_DURATION = 4000;
 
 // Default currency
-export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'جنيه';
+export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'USD - US Dollar';

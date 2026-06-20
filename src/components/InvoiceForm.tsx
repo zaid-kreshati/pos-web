@@ -9,23 +9,24 @@ import { useToast } from "../hooks/useToast";
 import { createInvoice } from "../api/invoiceApi";
 import { formatNumber } from "../utils/formatters";
 import { DEFAULT_CURRENCY } from "../utils/constants";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Plus, Info, Upload, Send, ChevronLeft, User, Edit3, ShoppingCart, FileText, Bell } from "lucide-react";
 
 export const InvoiceForm: React.FC = () => {
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUuid, setCreatedUuid] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
+  const [notes, setNotes] = useState("");
 
   const { register, handleSubmit, setValue, watch, control, formState, reset } =
     useForm<InvoiceFormSchema>({
       resolver: zodResolver(invoiceFormSchema),
       defaultValues: {
-        invoice_id: "",
+        invoice_id: "INV-2026-001",
         subtotal: 0,
         tax: 0,
         total: 0,
-        payment_method: "cash",
+        payment_method: "Bank Transfer",
         currency: DEFAULT_CURRENCY,
         voucher: undefined,
         invoice_items: [],
@@ -34,6 +35,8 @@ export const InvoiceForm: React.FC = () => {
 
   const { errors } = formState;
   const invoiceItems = watch("invoice_items");
+  const tax = watch("tax") || 0;
+  const voucher = watch("voucher") || 0;
 
   // Calculate totals from items
   const calculatedSubtotal =
@@ -41,6 +44,8 @@ export const InvoiceForm: React.FC = () => {
       (sum, item) => sum + (item.quantity * item.unit_price || 0),
       0,
     ) || 0;
+
+  const calculatedTotal = calculatedSubtotal + tax - voucher;
 
   const getErrorMessage = (error: unknown) => {
     if (error instanceof Error) {
@@ -57,7 +62,22 @@ export const InvoiceForm: React.FC = () => {
   const onSubmit = async (data: InvoiceFormSchema) => {
     setIsSubmitting(true);
     try {
-      const response = await createInvoice(data);
+      const invoiceData = {
+        ...data,
+        invoice_id: data.invoice_id,
+        subtotal: calculatedSubtotal,
+        tax: data.tax || 0,
+        total: calculatedTotal,
+        payment_method: data.payment_method,
+        currency: data.currency,
+        invoice_items: data.invoice_items.map(item => ({
+          ...item,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total: (item.quantity * item.unit_price || 0),
+        })),
+      };
+      const response = await createInvoice(invoiceData);
       setCreatedUuid(response.data.uuid);
       addToast(
         `Invoice created successfully! UUID: ${response.data.uuid}`,
@@ -83,34 +103,34 @@ export const InvoiceForm: React.FC = () => {
   if (createdUuid) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="bg-green-50 border-2 border-green-200 rounded-lg p-8 text-center">
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center">
           <div className="mb-4">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <Check className="h-8 w-8 text-green-600" />
+            <div className="mx-auto w-16 h-16 bg-green-600/20 rounded-full flex items-center justify-center">
+              <Check className="h-8 w-8 text-green-500" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-green-900 mb-2">
+          <h2 className="text-2xl font-bold text-white mb-2">
             Invoice Created Successfully!
           </h2>
-          <p className="text-green-700 mb-6">
+          <p className="text-slate-400 mb-6">
             Your invoice has been created and NFC tag is being written.
           </p>
 
-          <div className="bg-white border border-green-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-600 mb-2">Invoice UUID:</p>
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 mb-6">
+            <p className="text-sm text-slate-400 mb-2">Invoice UUID:</p>
             <div className="flex items-center justify-center gap-2">
-              <code className="text-lg font-mono font-bold text-gray-900 break-all">
+              <code className="text-lg font-mono font-bold text-white break-all">
                 {createdUuid}
               </code>
               <button
                 onClick={handleCopyUuid}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                className="p-2 hover:bg-slate-800 rounded-lg transition"
                 title="Copy UUID"
               >
                 {copiedToClipboard ? (
-                  <Check className="h-5 w-5 text-green-600" />
+                  <Check className="h-5 w-5 text-green-500" />
                 ) : (
-                  <Copy className="h-5 w-5 text-gray-600" />
+                  <Copy className="h-5 w-5 text-slate-400" />
                 )}
               </button>
             </div>
@@ -118,7 +138,7 @@ export const InvoiceForm: React.FC = () => {
 
           <button
             onClick={() => setCreatedUuid(null)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition"
+            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-xl transition"
           >
             Create Another Invoice
           </button>
@@ -128,227 +148,337 @@ export const InvoiceForm: React.FC = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="max-w-5xl mx-auto">
+      {/* Page Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2">
+            <ChevronLeft className="w-5 h-5 text-slate-400" />
+            <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+              <ShoppingCart className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold text-white">Invoicely</span>
+          </div>
+          <div className="flex-1" />
+          <button className="p-2 hover:bg-slate-800 rounded-lg transition">
+            <Bell className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+        <h1 className="text-3xl font-bold text-white mb-1">
           Create New Invoice
-        </h2>
+        </h1>
+        <p className="text-slate-500 text-sm">
+          Drafting invoice INV-2026-001
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Information Section */}
-          <section className="border-b border-gray-200 pb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      {/* Action Buttons */}
+      <div className="flex gap-3 mb-6">
+        <button
+          type="button"
+          onClick={() => reset()}
+          className="px-5 py-2.5 border border-slate-700 rounded-xl text-slate-300 font-medium hover:bg-slate-800 transition text-sm"
+        >
+          Reset Form
+        </button>
+        <button
+          type="submit"
+          form="invoice-form"
+          disabled={isSubmitting}
+          className={`px-6 py-2.5 rounded-xl font-semibold text-white transition flex items-center justify-center gap-2 text-sm ${
+            isSubmitting
+              ? "bg-slate-700 cursor-not-allowed"
+              : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+          }`}
+        >
+          {isSubmitting ? (
+            <>
+              <LoadingSpinner />
+              <span>Creating Invoice...</span>
+            </>
+          ) : (
+            "Create Invoice"
+          )}
+        </button>
+      </div>
+
+      <form id="invoice-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Basic Information Section */}
+        <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
+              <Info className="w-5 h-5 text-green-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">
               Basic Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Invoice ID */}
-              <div>
-                <label
-                  htmlFor="invoice_id"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Invoice ID *
-                </label>
-                <input
-                  {...register("invoice_id")}
-                  type="text"
-                  id="invoice_id"
-                  placeholder="e.g., INV-2026-001"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.invoice_id ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.invoice_id && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {errors.invoice_id.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Payment Method */}
-              <div>
-                <label
-                  htmlFor="payment_method"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Payment Method *
-                </label>
-                <input
-                  {...register("payment_method")}
-                  type="text"
-                  id="payment_method"
-                  placeholder="e.g., cash, card"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.payment_method ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.payment_method && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {errors.payment_method.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Currency */}
-              <div>
-                <label
-                  htmlFor="currency"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Currency *
-                </label>
-                <input
-                  {...register("currency")}
-                  type="text"
-                  id="currency"
-                  placeholder="EUR"
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition ${
-                    errors.currency ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.currency && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {errors.currency.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Voucher (optional) */}
-              <div>
-                <label
-                  htmlFor="voucher"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Voucher / Discount (Optional)
-                </label>
-                <input
-                  {...register("voucher", { valueAsNumber: true })}
-                  type="number"
-                  id="voucher"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Invoice ID */}
+            <div>
+              <label
+                htmlFor="invoice_id"
+                className="block text-sm font-medium text-slate-300 mb-2"
+              >
+                Invoice ID
+              </label>
+              <input
+                {...register("invoice_id")}
+                type="text"
+                id="invoice_id"
+                placeholder="e.g., INV-2026-001"
+                className={`w-full px-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
+                  errors.invoice_id ? 'border-red-500' : 'border-slate-700'
+                }`}
+              />
+              {errors.invoice_id && (
+                <p className="text-red-500 text-sm mt-1.5">
+                  {errors.invoice_id.message}
+                </p>
+              )}
             </div>
-          </section>
 
-          {/* Line Items Section */}
-          <section className="border-b border-gray-200 pb-8">
-            <LineItemsInput
-              control={control}
-              register={register}
-              watch={watch}
-              setValue={setValue}
-              formState={formState}
-            />{" "}
-            {errors.invoice_items && (
-              <p className="text-red-600 text-sm mt-2">
-                {errors.invoice_items.message}
-              </p>
-            )}
-          </section>
+            {/* Voucher */}
+            <div>
+              <label
+                htmlFor="voucher"
+                className="block text-sm font-medium text-slate-300 mb-2"
+              >
+                Voucher (Optional)
+              </label>
+              <input
+                {...register("voucher", { valueAsNumber: true })}
+                type="number"
+                id="voucher"
+                step="0.01"
+                min="0"
+                placeholder="Enter code"
+                className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500"
+              />
+            </div>
 
-          {/* Pricing Section */}
-          <section className="bg-gray-50 rounded-lg p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            {/* Payment Method */}
+            <div>
+              <label
+                htmlFor="payment_method"
+                className="block text-sm font-medium text-slate-300 mb-2"
+              >
+                Payment Method
+              </label>
+              <select
+                {...register("payment_method")}
+                id="payment_method"
+                className={`w-full px-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white ${
+                  errors.payment_method ? 'border-red-500' : 'border-slate-700'
+                }`}
+              >
+                <option value="Credit Card">Credit Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Cash">Cash</option>
+                <option value="PayPal">PayPal</option>
+              </select>
+              {errors.payment_method && (
+                <p className="text-red-500 text-sm mt-1.5">
+                  {errors.payment_method.message}
+                </p>
+              )}
+            </div>
+
+            {/* Currency */}
+            <div>
+              <label
+                htmlFor="currency"
+                className="block text-sm font-medium text-slate-300 mb-2"
+              >
+                Currency
+              </label>
+              <select
+                {...register("currency")}
+                id="currency"
+                className={`w-full px-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white ${
+                  errors.currency ? 'border-red-500' : 'border-slate-700'
+                }`}
+              >
+                <option value="USD - US Dollar">USD - US Dollar</option>
+                <option value="EUR - Euro">EUR - Euro</option>
+                <option value="GBP - British Pound">GBP - British Pound</option>
+                <option value="JPY - Japanese Yen">JPY - Japanese Yen</option>
+              </select>
+              {errors.currency && (
+                <p className="text-red-500 text-sm mt-1.5">
+                  {errors.currency.message}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Line Items Section */}
+        <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <LineItemsInput
+            control={control}
+            register={register}
+            watch={watch}
+            setValue={setValue}
+            formState={formState}
+          />
+          {errors.invoice_items && (
+            <p className="text-red-500 text-sm mt-4">
+              {errors.invoice_items.message}
+            </p>
+          )}
+        </section>
+
+        {/* Notes Section */}
+        {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <h3 className="text-sm font-medium text-slate-300 mb-3">
+            Invoice Notes
+          </h3>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Enter additional information for your client"
+            rows={3}
+            className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 resize-none"
+          />
+        </section> */}
+
+        {/* Upload Attachments */}
+        {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div className="flex flex-col items-center justify-center py-7 border-2 border-dashed border-slate-700 rounded-xl">
+            <Upload className="w-12 h-12 text-green-500 mb-3" />
+            <p className="text-slate-300 font-medium">Upload Attachments</p>
+            <p className="text-sm text-slate-500">PDF, JPG, PNG (Max 5MB)</p>
+          </div>
+        </section> */}
+
+        {/* Pricing Summary Section */}
+        <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
+              <FileText className="w-5 h-5 text-green-500" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">
               Pricing Summary
             </h3>
+          </div>
 
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-700">
-                  Subtotal (calculated from items):
-                </span>
-                <span className="text-lg font-semibold text-gray-900">
-                  {formatNumber(calculatedSubtotal)}
-                </span>
-              </div>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center py-2">
+              <span className="text-slate-400">
+                Subtotal (Calculated)
+              </span>
+              <span className="text-lg font-semibold text-white">
+                ${formatNumber(calculatedSubtotal)}
+              </span>
+            </div>
 
-              <div className="flex justify-between items-center">
-                <label htmlFor="subtotal" className="text-gray-700">
-                  Subtotal (manual) *:
+            <div className="flex justify-between items-center py-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="tax" className="text-slate-400">
+                  Manual Subtotal
                 </label>
+              </div>
+              <div className="flex items-center gap-2">
                 <input
                   {...register("subtotal", { valueAsNumber: true })}
                   readOnly
-                  className="w-32 px-3 py-1 border border-gray-300 rounded-lg bg-gray-100"
+                  type="number"
+                  id="subtotal"
+                  className="w-36 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white text-right"
                 />
               </div>
+            </div>
 
-              <div className="flex justify-between items-center">
-                <label htmlFor="tax" className="text-gray-700">
-                  Tax *:
+            <div className="flex justify-between items-center py-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="tax" className="text-slate-400">
+                  Tax
                 </label>
+              </div>
+              <div className="flex items-center gap-2">
                 <input
                   {...register("tax", { valueAsNumber: true })}
                   type="number"
                   id="tax"
                   step="0.01"
                   min="0"
-                  className="w-32 px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
-
-              <div className="border-t border-gray-300 pt-3 flex justify-between items-center">
-                <label
-                  htmlFor="total"
-                  className="text-lg font-semibold text-gray-900"
-                >
-                  Total *:
-                </label>
-                <input
-                  {...register("total", { valueAsNumber: true })}
-                  readOnly
-                  className="w-32 px-3 py-2 text-lg font-bold border border-gray-300 rounded-lg bg-gray-100"
+                  placeholder="0"
+                  className="w-36 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white text-right"
                 />
               </div>
             </div>
 
-            {errors.subtotal && (
-              <p className="text-red-600 text-sm">{errors.subtotal.message}</p>
-            )}
-            {errors.tax && (
-              <p className="text-red-600 text-sm">{errors.tax.message}</p>
-            )}
-            {errors.total && (
-              <p className="text-red-600 text-sm">{errors.total.message}</p>
-            )}
-          </section>
+            <div className="border-t border-slate-700 pt-4 flex justify-between items-center">
+              <span className="text-xl font-bold text-white">Total</span>
+              <span className="text-2xl font-bold text-green-500">
+                ${formatNumber(calculatedTotal)}
+              </span>
+            </div>
+          </div>
+        </section>
 
-          {/* Form Actions */}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium text-white transition flex items-center justify-center gap-2 ${
-                isSubmitting
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <LoadingSpinner />
-                  <span>Creating Invoice...</span>
-                </>
-              ) : (
-                "Create Invoice"
-              )}
-            </button>
-
-            <button
-              type="reset"
-              onClick={() => reset()}
-              disabled={isSubmitting}
-              className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
-            >
-              Reset Form
+        {/* Client Info Section */}
+        {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-green-500" />
+            </div>
+            <h3 className="text-sm font-medium text-slate-300">Client</h3>
+            <div className="flex-1" />
+            <button type="button" className="text-green-500 text-sm font-medium hover:text-green-400 transition">
+              Change
             </button>
           </div>
-        </form>
-      </div>
+          
+          <div className="flex items-center gap-4 p-4 bg-slate-900 rounded-xl">
+            <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
+              <User className="w-6 h-6 text-slate-500" />
+            </div>
+            <div>
+              <p className="font-semibold text-white">Acme Corporation</p>
+              <p className="text-sm text-slate-500">invoices@acme.com</p>
+            </div>
+          </div>
+        </section> */}
+
+        {/* Send Button */}
+        <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full py-4 px-6 rounded-xl font-semibold text-white transition flex items-center justify-center gap-2 ${
+              isSubmitting
+                ? "bg-slate-700 cursor-not-allowed"
+                : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+            }`}
+          >
+            {isSubmitting ? (
+              <>
+                <LoadingSpinner />
+                <span>Creating Invoice...</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-5 h-5" />
+                <span>Send to Client</span>
+              </>
+            )}
+          </button>
+
+          {/* Auto-reminders Badge */}
+          {/* <div className="flex items-center justify-center gap-2 mt-4">
+            <div className="w-7 h-7 bg-green-600/20 rounded-full flex items-center justify-center">
+              <Bell className="w-4 h-4 text-green-500" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-medium text-slate-300">Auto-reminders</p>
+              <p className="text-xs text-slate-500">System will automatically track payment and notify the client accordingly.</p>
+            </div>
+          </div> */}
+        </section>
+      </form>
     </div>
   );
 };
