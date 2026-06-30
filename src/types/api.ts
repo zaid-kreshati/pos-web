@@ -39,3 +39,65 @@ export interface Product {
   name: string;
   price: number;
 }
+
+export interface Store {
+  id: number;
+  name: string;
+  profile_image_url?: string;
+}
+
+export interface Branch {
+  id: number;
+  name: string;
+}
+
+export interface InvoiceItem {
+  id: number;
+  product_id?: number;
+  product_name?: string;
+  quantity: number;
+  unit_price: number;
+  total: number;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email?: string;
+}
+
+export interface Invoice {
+  id: number;
+  uuid: string;
+  external_invoice_id: string;
+  user_id?: number;
+  pos_device_id?: number;
+  store_id?: number;
+  branch_id?: number;
+  claimed: boolean;
+  claimed_at?: string;
+  expires_at?: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+  currency: string;
+  payment_method: string;
+  voucher?: number;
+  status: string;
+  store?: Store;
+  branch?: Branch;
+  user?: User;
+  items?: InvoiceItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number;
+  from: number;
+  to: number;
+}

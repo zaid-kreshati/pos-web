@@ -11,9 +11,7 @@ export const ENDPOINTS = {
   },
   INVOICES: {
     CREATE: '/invoices',
-    LIST: '/invoices/list',
-    GET_BY_ID: (id: number) => `/invoices/id/${id}`,
-    GET_BY_UUID: (uuid: string) => `/invoices/uuid/${uuid}`,
+    LIST: '/invoices/all-full',
   },
 
   PRODUCTS: {
@@ -43,4 +41,4 @@ export const STORAGE_KEYS = {
 export const TOAST_DURATION = 4000;
 
 // Default currency
-export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'USD - US Dollar';
+export const DEFAULT_CURRENCY = import.meta.env.VITE_CURRENCY || 'جنيه';

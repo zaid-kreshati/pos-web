@@ -28,7 +28,7 @@ export const InvoiceForm: React.FC = () => {
         total: 0,
         payment_method: "Bank Transfer",
         currency: DEFAULT_CURRENCY,
-        voucher: undefined,
+        voucher: 0,
         invoice_items: [],
       },
     });
@@ -56,7 +56,7 @@ export const InvoiceForm: React.FC = () => {
       return String(error.message);
     }
 
-    return "Failed to create invoice";
+    return "فشل إنشاء الفاتورة";
   };
 
   const onSubmit = async (data: InvoiceFormSchema) => {
@@ -66,7 +66,7 @@ export const InvoiceForm: React.FC = () => {
         ...data,
         invoice_id: data.invoice_id,
         subtotal: calculatedSubtotal,
-        tax: data.tax || 0,
+        tax: data.tax ?? 0,
         total: calculatedTotal,
         payment_method: data.payment_method,
         currency: data.currency,
@@ -74,13 +74,14 @@ export const InvoiceForm: React.FC = () => {
           ...item,
           quantity: item.quantity,
           unit_price: item.unit_price,
-          total: (item.quantity * item.unit_price || 0),
+          total: (item.quantity * item.unit_price),
+
         })),
       };
       const response = await createInvoice(invoiceData);
       setCreatedUuid(response.data.uuid);
       addToast(
-        `Invoice created successfully! UUID: ${response.data.uuid}`,
+        `تم إنشاء الفاتورة بنجاح! UUID: ${response.data.uuid}`,
         "success",
       );
       reset();
@@ -110,14 +111,14 @@ export const InvoiceForm: React.FC = () => {
             </div>
           </div>
           <h2 className="text-2xl font-bold text-white mb-2">
-            Invoice Created Successfully!
+            تم إنشاء الفاتورة بنجاح!
           </h2>
           <p className="text-slate-400 mb-6">
-            Your invoice has been created and NFC tag is being written.
+            تم إنشاء الفاتورة ويتم الآن كتابة علامة NFC.
           </p>
 
           <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 mb-6">
-            <p className="text-sm text-slate-400 mb-2">Invoice UUID:</p>
+            <p className="text-sm text-slate-400 mb-2">UUID الفاتورة:</p>
             <div className="flex items-center justify-center gap-2">
               <code className="text-lg font-mono font-bold text-white break-all">
                 {createdUuid}
@@ -125,7 +126,7 @@ export const InvoiceForm: React.FC = () => {
               <button
                 onClick={handleCopyUuid}
                 className="p-2 hover:bg-slate-800 rounded-lg transition"
-                title="Copy UUID"
+                title="نسخ UUID"
               >
                 {copiedToClipboard ? (
                   <Check className="h-5 w-5 text-green-500" />
@@ -140,7 +141,7 @@ export const InvoiceForm: React.FC = () => {
             onClick={() => setCreatedUuid(null)}
             className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-xl transition"
           >
-            Create Another Invoice
+            إنشاء فاتورة جديدة
           </button>
         </div>
       </div>
@@ -148,16 +149,16 @@ export const InvoiceForm: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto" dir="rtl">
       {/* Page Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 flex-row-reverse">
           <div className="flex items-center gap-2">
             <ChevronLeft className="w-5 h-5 text-slate-400" />
             <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-4 h-4 text-white" />
             </div>
-            <span className="font-bold text-white">Invoicely</span>
+            <ChevronLeft className="w-5 h-5 text-slate-400 rotate-180" />
           </div>
           <div className="flex-1" />
           <button className="p-2 hover:bg-slate-800 rounded-lg transition">
@@ -165,21 +166,21 @@ export const InvoiceForm: React.FC = () => {
           </button>
         </div>
         <h1 className="text-3xl font-bold text-white mb-1">
-          Create New Invoice
+          إنشاء فاتورة جديدة
         </h1>
         <p className="text-slate-500 text-sm">
-          Drafting invoice INV-2026-001
+          مسودة الفاتورة INV-2026-001
         </p>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-6 flex-row-reverse">
         <button
           type="button"
           onClick={() => reset()}
           className="px-5 py-2.5 border border-slate-700 rounded-xl text-slate-300 font-medium hover:bg-slate-800 transition text-sm"
         >
-          Reset Form
+          إعادة تعيين النموذج
         </button>
         <button
           type="submit"
@@ -194,10 +195,10 @@ export const InvoiceForm: React.FC = () => {
           {isSubmitting ? (
             <>
               <LoadingSpinner />
-              <span>Creating Invoice...</span>
+              <span>جاري إنشاء الفاتورة...</span>
             </>
           ) : (
-            "Create Invoice"
+            "إنشاء الفاتورة"
           )}
         </button>
       </div>
@@ -205,13 +206,13 @@ export const InvoiceForm: React.FC = () => {
       <form id="invoice-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         {/* Basic Information Section */}
         <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-6 flex-row-reverse">
+            <h3 className="text-lg font-semibold text-white">
+              المعلومات الأساسية
+            </h3>
             <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
               <Info className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="text-lg font-semibold text-white">
-              Basic Information
-            </h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -221,13 +222,13 @@ export const InvoiceForm: React.FC = () => {
                 htmlFor="invoice_id"
                 className="block text-sm font-medium text-slate-300 mb-2"
               >
-                Invoice ID
+                رقم الفاتورة
               </label>
               <input
                 {...register("invoice_id")}
                 type="text"
                 id="invoice_id"
-                placeholder="e.g., INV-2026-001"
+                placeholder="مثال: INV-2026-001"
                 className={`w-full px-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
                   errors.invoice_id ? 'border-red-500' : 'border-slate-700'
                 }`}
@@ -245,7 +246,7 @@ export const InvoiceForm: React.FC = () => {
                 htmlFor="voucher"
                 className="block text-sm font-medium text-slate-300 mb-2"
               >
-                Voucher (Optional)
+                قسيمة خصم (اختياري)
               </label>
               <input
                 {...register("voucher", { valueAsNumber: true })}
@@ -253,7 +254,7 @@ export const InvoiceForm: React.FC = () => {
                 id="voucher"
                 step="0.01"
                 min="0"
-                placeholder="Enter code"
+                placeholder="مثال: 10.00"
                 className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500"
               />
             </div>
@@ -264,7 +265,7 @@ export const InvoiceForm: React.FC = () => {
                 htmlFor="payment_method"
                 className="block text-sm font-medium text-slate-300 mb-2"
               >
-                Payment Method
+                طريقة الدفع
               </label>
               <select
                 {...register("payment_method")}
@@ -273,10 +274,9 @@ export const InvoiceForm: React.FC = () => {
                   errors.payment_method ? 'border-red-500' : 'border-slate-700'
                 }`}
               >
-                <option value="Credit Card">Credit Card</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-                <option value="Cash">Cash</option>
-                <option value="PayPal">PayPal</option>
+                <option value="Credit Card">بطاقة ائتمان</option>
+                <option value="Bank Transfer">تحويل بنكي</option>
+                <option value="Cash">نقدي</option>
               </select>
               {errors.payment_method && (
                 <p className="text-red-500 text-sm mt-1.5">
@@ -291,7 +291,7 @@ export const InvoiceForm: React.FC = () => {
                 htmlFor="currency"
                 className="block text-sm font-medium text-slate-300 mb-2"
               >
-                Currency
+                العملة
               </label>
               <select
                 {...register("currency")}
@@ -300,10 +300,11 @@ export const InvoiceForm: React.FC = () => {
                   errors.currency ? 'border-red-500' : 'border-slate-700'
                 }`}
               >
-                <option value="USD - US Dollar">USD - US Dollar</option>
-                <option value="EUR - Euro">EUR - Euro</option>
-                <option value="GBP - British Pound">GBP - British Pound</option>
-                <option value="JPY - Japanese Yen">JPY - Japanese Yen</option>
+                <option value="USD">دولار أمريكي</option>
+                <option value="EUR">يورو</option>
+                 <option value="جنيه">جنيه مصري</option>
+                <option value="GBP">جنيه إسترليني</option>
+                <option value="JPY">ين ياباني</option>
               </select>
               {errors.currency && (
                 <p className="text-red-500 text-sm mt-1.5">
@@ -333,53 +334,41 @@ export const InvoiceForm: React.FC = () => {
         {/* Notes Section */}
         {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
           <h3 className="text-sm font-medium text-slate-300 mb-3">
-            Invoice Notes
+            ملاحظات الفاتورة
           </h3>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Enter additional information for your client"
+            placeholder="أدخل معلومات إضافية للعميل"
             rows={3}
             className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 resize-none"
           />
         </section> */}
 
-        {/* Upload Attachments */}
-        {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div className="flex flex-col items-center justify-center py-7 border-2 border-dashed border-slate-700 rounded-xl">
-            <Upload className="w-12 h-12 text-green-500 mb-3" />
-            <p className="text-slate-300 font-medium">Upload Attachments</p>
-            <p className="text-sm text-slate-500">PDF, JPG, PNG (Max 5MB)</p>
-          </div>
-        </section> */}
+       
 
         {/* Pricing Summary Section */}
         <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-6 flex-row-reverse">
+            <h3 className="text-lg font-semibold text-white">
+              ملخص الأسعار
+            </h3>
             <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
               <FileText className="w-5 h-5 text-green-500" />
             </div>
-            <h3 className="text-lg font-semibold text-white">
-              Pricing Summary
-            </h3>
           </div>
 
           <div className="space-y-4">
-            <div className="flex justify-between items-center py-2">
-              <span className="text-slate-400">
-                Subtotal (Calculated)
-              </span>
+            <div className="flex justify-between items-center py-2 flex-row-reverse">
               <span className="text-lg font-semibold text-white">
-                ${formatNumber(calculatedSubtotal)}
+                {formatNumber(calculatedSubtotal)} {watch("currency")}
+              </span>
+              <span className="text-slate-400">
+                المجموع الفرعي (محسوب)
               </span>
             </div>
 
-            <div className="flex justify-between items-center py-2">
-              <div className="flex items-center gap-2">
-                <label htmlFor="tax" className="text-slate-400">
-                  Manual Subtotal
-                </label>
-              </div>
+            <div className="flex justify-between items-center py-2 flex-row-reverse">
               <div className="flex items-center gap-2">
                 <input
                   {...register("subtotal", { valueAsNumber: true })}
@@ -389,14 +378,14 @@ export const InvoiceForm: React.FC = () => {
                   className="w-36 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white text-right"
                 />
               </div>
-            </div>
-
-            <div className="flex justify-between items-center py-2">
               <div className="flex items-center gap-2">
                 <label htmlFor="tax" className="text-slate-400">
-                  Tax
+                  المجموع الفرعي اليدوي
                 </label>
               </div>
+            </div>
+
+            <div className="flex justify-between items-center py-2 flex-row-reverse">
               <div className="flex items-center gap-2">
                 <input
                   {...register("tax", { valueAsNumber: true })}
@@ -408,40 +397,23 @@ export const InvoiceForm: React.FC = () => {
                   className="w-36 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none text-white text-right"
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <label htmlFor="tax" className="text-slate-400">
+                  الضريبة
+                </label>
+              </div>
             </div>
 
-            <div className="border-t border-slate-700 pt-4 flex justify-between items-center">
-              <span className="text-xl font-bold text-white">Total</span>
+            <div className="border-t border-slate-700 pt-4 flex justify-between items-center flex-row-reverse">
               <span className="text-2xl font-bold text-green-500">
-                ${formatNumber(calculatedTotal)}
+                {formatNumber(calculatedTotal)} {watch("currency")}
               </span>
+              <span className="text-xl font-bold text-white">الإجمالي</span>
             </div>
           </div>
         </section>
 
-        {/* Client Info Section */}
-        {/* <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-green-500" />
-            </div>
-            <h3 className="text-sm font-medium text-slate-300">Client</h3>
-            <div className="flex-1" />
-            <button type="button" className="text-green-500 text-sm font-medium hover:text-green-400 transition">
-              Change
-            </button>
-          </div>
-          
-          <div className="flex items-center gap-4 p-4 bg-slate-900 rounded-xl">
-            <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-slate-500" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Acme Corporation</p>
-              <p className="text-sm text-slate-500">invoices@acme.com</p>
-            </div>
-          </div>
-        </section> */}
+        
 
         {/* Send Button */}
         <section className="bg-slate-800 rounded-2xl p-6 border border-slate-700">
@@ -457,26 +429,17 @@ export const InvoiceForm: React.FC = () => {
             {isSubmitting ? (
               <>
                 <LoadingSpinner />
-                <span>Creating Invoice...</span>
+                <span>جاري إنشاء الفاتورة...</span>
               </>
             ) : (
               <>
+                <span>إنشاء الفاتورة</span>
                 <Send className="w-5 h-5" />
-                <span>Send to Client</span>
               </>
             )}
           </button>
 
-          {/* Auto-reminders Badge */}
-          {/* <div className="flex items-center justify-center gap-2 mt-4">
-            <div className="w-7 h-7 bg-green-600/20 rounded-full flex items-center justify-center">
-              <Bell className="w-4 h-4 text-green-500" />
-            </div>
-            <div className="text-left">
-              <p className="text-sm font-medium text-slate-300">Auto-reminders</p>
-              <p className="text-xs text-slate-500">System will automatically track payment and notify the client accordingly.</p>
-            </div>
-          </div> */}
+         
         </section>
       </form>
     </div>

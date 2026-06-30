@@ -6,6 +6,7 @@ import { ToastContainer } from './components/Toast';
 import { useAuth } from './hooks/useAuth';
 import { LoginPage } from './pages/LoginPage';
 import { CreateInvoicePage } from './pages/CreateInvoicePage';
+import { InvoiceListPage } from './pages/InvoiceListPage';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -18,10 +19,33 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Admin-only route component
+const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'admin') {
+    return <Navigate to="/invoices" replace />;
+  }
+
+  return <>{children}</>;
+};
+
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/invoices"
+        element={
+          <ProtectedRoute>
+            <InvoiceListPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/create-invoice"
         element={
@@ -30,8 +54,8 @@ export const AppRoutes: React.FC = () => {
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/create-invoice" replace />} />
-      <Route path="*" element={<Navigate to="/create-invoice" replace />} />
+      <Route path="/" element={<Navigate to="/invoices" replace />} />
+      <Route path="*" element={<Navigate to="/invoices" replace />} />
     </Routes>
   );
 };

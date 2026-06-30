@@ -1,7 +1,7 @@
 import apiClient from './client';
 import { ENDPOINTS, POS_API_TOKEN } from '../utils/constants';
 import type { InvoiceFormData } from '../types/forms';
-import type { CreateInvoiceResponse, Product } from '../types/api';
+import type { CreateInvoiceResponse, Product, Invoice, PaginatedResponse, ApiResponse } from '../types/api';
 
 const toInvoicePayload = (data: InvoiceFormData): InvoiceFormData => ({
   ...data,
@@ -28,7 +28,6 @@ export const createInvoice = async (data: InvoiceFormData): Promise<CreateInvoic
         Authorization: `Bearer ${POS_API_TOKEN}`,
       },
       skipAuthRedirect: true,
-      
     }
   );
 
@@ -48,5 +47,21 @@ export const getProducts = async (): Promise<Product[]> => {
 
   return response.data.data;
 };
+
+export const getInvoices = async (params?: { search?: string; page?: number; per_page?: number }): Promise<ApiResponse<PaginatedResponse<Invoice>>> => {
+    const response = await apiClient.get<ApiResponse<PaginatedResponse<Invoice>>>(
+        ENDPOINTS.INVOICES.LIST,
+        {
+            params: {
+                search: params?.search,
+                page: params?.page || 1,
+                per_page: params?.per_page || 20,
+            },
+            skipAuthRedirect: true,
+        }
+    );
+    return response.data;
+};
+
 
 

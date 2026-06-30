@@ -38,6 +38,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
   const [loading, setLoading] = useState(false);
 
   const invoiceItems = watch("invoice_items");
+  const currency = watch("currency");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -79,14 +80,14 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-row-reverse">
         <div className="flex items-center gap-3">
+          <h3 className="text-lg font-semibold text-white">
+            العناصر
+          </h3>
           <div className="w-9 h-9 bg-green-600/20 rounded-full flex items-center justify-center">
             <ShoppingCart className="w-5 h-5 text-green-500" />
           </div>
-          <h3 className="text-lg font-semibold text-white">
-            Line Items
-          </h3>
         </div>
 
         <button
@@ -102,13 +103,13 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
           }
           className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-xl transition"
         >
+          <span>إضافة عنصر</span>
           <Plus className="w-4 h-4" />
-          Add Item
         </button>
       </div>
 
       {fields.length === 0 && (
-        <p className="text-red-500 text-sm">At least one item is required</p>
+        <p className="text-red-500 text-sm">مطلوب عنصر واحد على الأقل</p>
       )}
 
       <div className="space-y-4">
@@ -125,7 +126,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
               {/* Product Selection */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Product
+                  المنتج
                 </label>
 
                 <select
@@ -156,7 +157,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                   }}
                 >
                   <option value="">
-                    {loading ? "Loading products..." : "Select Product"}
+                    {loading ? "جارٍ تحميل المنتجات..." : "اختر المنتج"}
                   </option>
 
                   {products.map((product) => (
@@ -187,7 +188,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                 {/* Quantity */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Qty
+                    الكمية
                   </label>
 
                   <input
@@ -209,7 +210,7 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                 {/* Unit Price */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Price
+                    السعر
                   </label>
 
                   <input
@@ -235,12 +236,12 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
                 {/* Total */}
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Total
+                    الإجمالي
                   </label>
 
-                  <div className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl flex items-center">
+                  <div className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl flex items-center flex-row-reverse">
                     <span className="text-slate-300 font-medium">
-                      ${formatNumber(total)}
+                      {formatNumber(total)} {currency}
                     </span>
                   </div>
                 </div>
@@ -256,14 +257,14 @@ export const LineItemsInput: React.FC<LineItemsInputProps> = ({
               />
 
               {/* Remove Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-start">
                 <button
                   type="button"
                   onClick={() => remove(index)}
                   className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-xl transition"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Remove
+                  <span>حذف</span>
                 </button>
               </div>
             </div>

@@ -8,7 +8,6 @@ import { loginFormSchema } from '../utils/validation';
 import type { LoginFormSchema } from '../utils/validation';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Wallet, ShieldCheck } from 'lucide-react';
-import type { LoginFormData } from '../types/forms';
 
 export const LoginForm: React.FC = () => {
   const { login, isLoading, error, clearError } = useAuth();
@@ -28,45 +27,48 @@ export const LoginForm: React.FC = () => {
   const onSubmit = async (data: LoginFormSchema) => {
     try {
       clearError();
-      await login(data as LoginFormData);
-      addToast('Logged in successfully!', 'success');
+      await login({
+        email: data.email,
+        password: data.password,
+      });
+      addToast('تم تسجيل الدخول بنجاح!', 'success');
       navigate('/create-invoice');
     } catch {
-      const errorMessage = error || 'Login failed. Please try again.';
+      const errorMessage = error || 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.';
       addToast(errorMessage, 'error');
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md" dir="rtl">
         {/* Logo & Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-2xl mb-6 shadow-xl shadow-green-500/20">
             <Wallet className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-white mb-2">Invoicely</h1>
-          <p className="text-slate-400 text-lg">Professional Billing simplified.</p>
+          <h1 className="text-4xl font-bold text-white mb-2">إنفويسلي</h1>
+          <p className="text-slate-400 text-lg">فواتير احترافية مبسطة.</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-700">
-          <h2 className="text-2xl font-bold text-white mb-2">Welcome back</h2>
-          <p className="text-slate-400 mb-7">Please enter your details to sign in.</p>
+          <h2 className="text-2xl font-bold text-white mb-2">مرحباً بك</h2>
+          <p className="text-slate-400 mb-7">يرجى إدخال تفاصيلك لتسجيل الدخول.</p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Email input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                Email Address
+                البريد الإلكتروني
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   {...register('email')}
                   type="email"
                   id="email"
-                  className={`w-full pl-12 pr-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
+                  className={`w-full pr-12 pl-4 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
                     errors.email ? 'border-red-500' : 'border-slate-700'
                   }`}
                   placeholder="name@company.com"
@@ -77,21 +79,21 @@ export const LoginForm: React.FC = () => {
 
             {/* Password input */}
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2 flex-row-reverse">
                 <label htmlFor="password" className="block text-sm font-medium text-slate-300">
-                  Password
+                  كلمة المرور
                 </label>
                 <a href="#" className="text-sm font-medium text-green-500 hover:text-green-400 transition">
-                  Forgot password?
+                  نسيت كلمة المرور؟
                 </a>
               </div>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   {...register('password')}
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  className={`w-full pl-12 pr-12 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
+                  className={`w-full pr-12 pl-12 py-3 bg-slate-900 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition text-white placeholder-slate-500 ${
                     errors.password ? 'border-red-500' : 'border-slate-700'
                   }`}
                   placeholder="••••••••"
@@ -99,7 +101,7 @@ export const LoginForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300 transition"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -108,7 +110,7 @@ export const LoginForm: React.FC = () => {
             </div>
 
             {/* Remember this device */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-row-reverse">
               <input
                 type="checkbox"
                 id="remember"
@@ -117,7 +119,7 @@ export const LoginForm: React.FC = () => {
                 className="w-4 h-4 rounded border-slate-600 bg-slate-900 text-green-600 focus:ring-green-500"
               />
               <label htmlFor="remember" className="text-sm text-slate-300">
-                Stay signed in for 30 days
+                البقاء مسجل الدخول لمدة 30 يوماً
               </label>
             </div>
 
@@ -134,12 +136,12 @@ export const LoginForm: React.FC = () => {
               {isLoading ? (
                 <>
                   <LoadingSpinner />
-                  <span>Signing in...</span>
+                  <span>جارٍ تسجيل الدخول...</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-6 h-6" />
+                  <span>تسجيل الدخول</span>
+                  <ArrowRight className="w-6 h-6 rotate-180" />
                 </>
               )}
             </button>
@@ -150,7 +152,7 @@ export const LoginForm: React.FC = () => {
                 <div className="w-full border-t border-slate-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-slate-800 text-slate-400">Or continue with</span>
+                <span className="px-4 bg-slate-800 text-slate-400">أو متابعة باستخدام</span>
               </div>
             </div>
 
@@ -181,9 +183,9 @@ export const LoginForm: React.FC = () => {
 
             {/* Sign up link */}
             <p className="text-center text-slate-400 mt-7">
-              Don't have an account?{' '}
+              ليس لديك حساب؟{' '}
               <a href="#" className="text-green-500 font-semibold hover:text-green-400 transition">
-                Start 14-day free trial
+                ابدأ الفترة التجريبية المجانية لمدة 14 يوماً
               </a>
             </p>
 
@@ -199,14 +201,14 @@ export const LoginForm: React.FC = () => {
         {/* Security Badge */}
         <div className="mt-6 flex items-center justify-center gap-2">
           <ShieldCheck className="w-4 h-4 text-slate-500" />
-          <p className="text-slate-500 text-sm">256-bit AES Encryption Protected</p>
+          <p className="text-slate-500 text-sm">محم بتشفير AES 256-بت</p>
         </div>
 
         {/* Footer */}
         <div className="mt-6 flex justify-center gap-8">
-          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">Privacy Policy</a>
-          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">Terms of Service</a>
-          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">Status</a>
+          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">سياسة الخصوصية</a>
+          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">شروط الخدمة</a>
+          <a href="#" className="text-slate-500 text-sm hover:text-slate-400 transition">الحالة</a>
         </div>
       </div>
     </div>
