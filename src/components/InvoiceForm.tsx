@@ -9,14 +9,13 @@ import { useToast } from "../hooks/useToast";
 import { createInvoice } from "../api/invoiceApi";
 import { formatNumber } from "../utils/formatters";
 import { DEFAULT_CURRENCY } from "../utils/constants";
-import { Copy, Check, Plus, Info, Upload, Send, ChevronLeft, User, Edit3, ShoppingCart, FileText, Bell } from "lucide-react";
+import { Copy, Check, Info, Send, ChevronLeft, ShoppingCart, FileText, Bell } from "lucide-react";
 
 export const InvoiceForm: React.FC = () => {
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUuid, setCreatedUuid] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
-  const [notes, setNotes] = useState("");
 
   const { register, handleSubmit, setValue, watch, control, formState, reset } =
     useForm<InvoiceFormSchema>({

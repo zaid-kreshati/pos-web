@@ -4,7 +4,6 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { getInvoices } from '../api/invoiceApi';
 import type { Invoice } from '../types/api';
 import { Search, FileText, Store, Calendar, ArrowLeft, ArrowRight } from 'lucide-react';
-import { formatNumber } from '../utils/formatters';
 
 export const InvoiceListPage: React.FC = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -12,7 +11,6 @@ export const InvoiceListPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
-  const [total, setTotal] = useState(0);
 
   const fetchInvoices = async (page = 1, searchTerm = '') => {
     setLoading(true);
@@ -25,7 +23,6 @@ export const InvoiceListPage: React.FC = () => {
       if (response.data) {
         setInvoices(response.data.data);
         setLastPage(response.data.last_page);
-        setTotal(response.data.total);
         setCurrentPage(response.data.current_page);
       }
     } catch (error) {

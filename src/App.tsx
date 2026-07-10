@@ -19,20 +19,20 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-// Admin-only route component
-const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated, user } = useAuth();
+// // Admin-only route component
+// const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+//   const { isAuthenticated, user } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
 
-  if (user?.role !== 'admin') {
-    return <Navigate to="/invoices" replace />;
-  }
+//   if (user?.role !== 'admin') {
+//     return <Navigate to="/invoices" replace />;
+//   }
 
-  return <>{children}</>;
-};
+//   return <>{children}</>;
+// };
 
 export const AppRoutes: React.FC = () => {
   return (

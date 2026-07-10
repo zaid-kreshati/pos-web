@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Wallet, LayoutDashboard, FileText, Users, Settings, Bell, Menu, X, ChevronLeft, Plus } from 'lucide-react';
+import { LogOut, Wallet, FileText, Users, Settings, Bell, Menu, X, ChevronLeft, Plus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
