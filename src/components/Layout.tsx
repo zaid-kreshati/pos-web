@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, Wallet, FileText, Users, Settings, Bell, Menu, X, ChevronLeft, Plus } from 'lucide-react';
+import { LogOut, Wallet, FileText, Users, Bell, Menu, X, ChevronLeft, Plus } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -20,10 +20,9 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { path: '/invoices/all-full', label: 'الفواتير', icon: FileText },
+    { path: '/invoices', label: 'الفواتير', icon: FileText },
     { path: '/create-invoice', label: 'إنشاء فاتورة', icon: Plus },
-    { path: '/clients', label: 'العملاء', icon: Users },
-    { path: '/settings', label: 'الإعدادات', icon: Settings },
+    ...(user?.role === 'admin' ? [{ path: '/admin/invoices', label: 'إدارة الفواتير', icon: Users }] : []),
   ];
 
   return (
