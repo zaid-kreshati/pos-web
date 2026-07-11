@@ -52,36 +52,12 @@ export const getInvoices = async (params?: { search?: string; page?: number; per
     const response = await apiClient.post<ApiResponse<PaginatedResponse<Invoice>>>(
         ENDPOINTS.INVOICES.LIST,
         {
-            search: params?.search,
-            page: params?.page || 1,
-            per_page: params?.per_page || 20,
-        },
-        {
+            params: {
+                search: params?.search,
+                page: params?.page || 1,
+                per_page: params?.per_page || 20,
+            },
             skipAuthRedirect: true,
-        }
-    );
-    return response.data;
-};
-
-export const getAllInvoices = async (params?: { search?: string; page?: number; per_page?: number }): Promise<ApiResponse<PaginatedResponse<Invoice>>> => {
-    const response = await apiClient.post<ApiResponse<PaginatedResponse<Invoice>>>(
-        '/invoices/all',
-        {
-            search: params?.search,
-            page: params?.page || 1,
-            per_page: params?.per_page || 20,
-        }
-    );
-    return response.data;
-};
-
-export const getAllInvoicesFull = async (params?: { search?: string; page?: number; per_page?: number }): Promise<ApiResponse<PaginatedResponse<Invoice>>> => {
-    const response = await apiClient.post<ApiResponse<PaginatedResponse<Invoice>>>(
-        '/invoices/all-full',
-        {
-            search: params?.search,
-            page: params?.page || 1,
-            per_page: params?.per_page || 20,
         }
     );
     return response.data;
