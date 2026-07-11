@@ -20,6 +20,7 @@ export interface LoginResponse extends ApiResponse {
 export interface CreateInvoiceResponse extends ApiResponse {
   data: {
     uuid: string;
+    nfc_url: string;
   };
 }
 

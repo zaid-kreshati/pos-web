@@ -7,14 +7,38 @@ import { LineItemsInput } from "./LineItemsInput";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { useToast } from "../hooks/useToast";
 import { createInvoice } from "../api/invoiceApi";
+import { writeToTag } from "../api/nfcBridge";
+import type { BridgeWriteResult } from "../api/nfcBridge";
 import { formatNumber } from "../utils/formatters";
 import { DEFAULT_CURRENCY } from "../utils/constants";
-import { Copy, Check, Info, Send, ChevronLeft, ShoppingCart, FileText, Bell } from "lucide-react";
+import { Copy, Check, Info, Send, ChevronLeft, ShoppingCart, FileText, Bell, Nfc, AlertTriangle, Loader2 } from "lucide-react";
+
+type NfcStatus = "idle" | "writing" | "success" | "error";
+
+// Human-readable message for a bridge failure.
+const nfcErrorMessage = (result: BridgeWriteResult): string => {
+  switch (result.error) {
+    case "no_reader":
+      return "لم يتم العثور على قارئ NFC. تأكد من توصيل القارئ وتشغيل الجسر.";
+    case "no_tag":
+    case "timeout":
+      return "لم يتم تقريب البطاقة في الوقت المناسب. حاول مرة أخرى.";
+    case "write_failed":
+      return "فشلت الكتابة على البطاقة. حاول ببطاقة أخرى.";
+    case "unreachable":
+      return "تعذّر الوصول إلى جسر NFC. هل تم تشغيل start_bridge على هذا الجهاز؟";
+    default:
+      return result.message || "فشلت كتابة NFC.";
+  }
+};
 
 export const InvoiceForm: React.FC = () => {
   const { addToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUuid, setCreatedUuid] = useState<string | null>(null);
+  const [nfcUrl, setNfcUrl] = useState<string | null>(null);
+  const [nfcStatus, setNfcStatus] = useState<NfcStatus>("idle");
+  const [nfcError, setNfcError] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
   const { register, handleSubmit, setValue, watch, control, formState, reset } =
@@ -78,16 +102,36 @@ export const InvoiceForm: React.FC = () => {
         })),
       };
       const response = await createInvoice(invoiceData);
+      const url = response.data.nfc_url ?? `casher://nfc?uuid=${response.data.uuid}`;
       setCreatedUuid(response.data.uuid);
+      setNfcUrl(url);
       addToast(
         `تم إنشاء الفاتورة بنجاح! UUID: ${response.data.uuid}`,
         "success",
       );
       reset();
+      // Automatically try to write the tag once the invoice exists.
+      void handleWriteTag(url);
     } catch (error) {
       addToast(getErrorMessage(error), "error");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Sends the invoice URL to the local NFC bridge on the POS device.
+  const handleWriteTag = async (url: string) => {
+    setNfcStatus("writing");
+    setNfcError(null);
+    const result = await writeToTag(url);
+    if (result.ok) {
+      setNfcStatus("success");
+      addToast("تمت كتابة بطاقة NFC بنجاح!", "success");
+    } else {
+      setNfcStatus("error");
+      const msg = nfcErrorMessage(result);
+      setNfcError(msg);
+      addToast(msg, "error");
     }
   };
 
@@ -113,7 +157,7 @@ export const InvoiceForm: React.FC = () => {
             تم إنشاء الفاتورة بنجاح!
           </h2>
           <p className="text-slate-400 mb-6">
-            تم إنشاء الفاتورة ويتم الآن كتابة علامة NFC.
+            تم إنشاء الفاتورة. قرّب البطاقة من القارئ لكتابة علامة NFC.
           </p>
 
           <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 mb-6">
@@ -136,12 +180,59 @@ export const InvoiceForm: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => setCreatedUuid(null)}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-xl transition"
-          >
-            إنشاء فاتورة جديدة
-          </button>
+          {/* NFC write status */}
+          <div className="mb-6">
+            {nfcStatus === "writing" && (
+              <div className="flex items-center justify-center gap-3 bg-slate-900 border border-slate-700 rounded-xl p-4 text-slate-300">
+                <Loader2 className="h-5 w-5 text-green-500 animate-spin" />
+                <span>جارِ كتابة البطاقة… قرّب البطاقة من القارئ</span>
+              </div>
+            )}
+            {nfcStatus === "success" && (
+              <div className="flex items-center justify-center gap-3 bg-green-600/10 border border-green-700 rounded-xl p-4 text-green-400">
+                <Nfc className="h-5 w-5" />
+                <span>تمت كتابة بطاقة NFC بنجاح</span>
+              </div>
+            )}
+            {nfcStatus === "error" && (
+              <div className="bg-red-600/10 border border-red-700 rounded-xl p-4 text-red-400">
+                <div className="flex items-center justify-center gap-3 mb-3">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span>{nfcError}</span>
+                </div>
+                <button
+                  onClick={() => nfcUrl && handleWriteTag(nfcUrl)}
+                  className="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 px-4 rounded-lg transition text-sm"
+                >
+                  <Nfc className="h-4 w-4" />
+                  إعادة المحاولة
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                setCreatedUuid(null);
+                setNfcUrl(null);
+                setNfcStatus("idle");
+                setNfcError(null);
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-xl transition"
+            >
+              إنشاء فاتورة جديدة
+            </button>
+            {nfcStatus !== "writing" && (
+              <button
+                onClick={() => nfcUrl && handleWriteTag(nfcUrl)}
+                className="inline-flex items-center gap-2 border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium py-2 px-6 rounded-xl transition"
+              >
+                <Nfc className="h-4 w-4" />
+                كتابة البطاقة مرة أخرى
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
