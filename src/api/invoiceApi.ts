@@ -49,7 +49,7 @@ export const getProducts = async (): Promise<Product[]> => {
 };
 
 export const getInvoices = async (params?: { search?: string; page?: number; per_page?: number }): Promise<ApiResponse<PaginatedResponse<Invoice>>> => {
-    const response = await apiClient.get<ApiResponse<PaginatedResponse<Invoice>>>(
+    const response = await apiClient.post<ApiResponse<PaginatedResponse<Invoice>>>(
         ENDPOINTS.INVOICES.LIST,
         {
             params: {
