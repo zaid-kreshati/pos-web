@@ -52,11 +52,11 @@ export const getInvoices = async (params?: { search?: string; page?: number; per
     const response = await apiClient.post<ApiResponse<PaginatedResponse<Invoice>>>(
         ENDPOINTS.INVOICES.LIST,
         {
-            params: {
-                search: params?.search,
-                page: params?.page || 1,
-                per_page: params?.per_page || 20,
-            },
+            search: params?.search,
+            page: params?.page || 1,
+            per_page: params?.per_page || 20,
+        },
+        {
             skipAuthRedirect: true,
         }
     );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { getInvoices } from '../api/invoiceApi';
@@ -11,6 +11,7 @@ export const InvoiceListPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
+  const isFirstLoad = useRef(true);
 
   const fetchInvoices = async (page = 1, searchTerm = '') => {
     setLoading(true);
@@ -33,13 +34,13 @@ export const InvoiceListPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchInvoices();
-  }, []);
+    // Debounced on search, but fires immediately on mount for the first load.
+    const delay = isFirstLoad.current ? 0 : 500;
+    isFirstLoad.current = false;
 
-  useEffect(() => {
     const timeoutId = setTimeout(() => {
       fetchInvoices(1, search);
-    }, 500);
+    }, delay);
     return () => clearTimeout(timeoutId);
   }, [search]);
 

@@ -17,6 +17,8 @@ export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    // Ensures Laravel treats failures as API requests (JSON 401), not redirects.
+    Accept: 'application/json',
   },
 });
 

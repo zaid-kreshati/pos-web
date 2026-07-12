@@ -14,7 +14,7 @@ export const ENDPOINTS = {
   },
   INVOICES: {
     CREATE: '/invoices',
-    LIST: '/invoices/all-full',
+    LIST: '/invoices/all',
   },
 
   PRODUCTS: {
