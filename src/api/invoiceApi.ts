@@ -63,5 +63,13 @@ export const getInvoices = async (params?: { search?: string; page?: number; per
     return response.data;
 };
 
+export const getPublicInvoice = async (uuid: string): Promise<ApiResponse<Invoice>> => {
+  const response = await apiClient.get<ApiResponse<Invoice>>(
+    ENDPOINTS.INVOICES.PUBLIC_BY_UUID(uuid),
+    { skipAuthRedirect: true },
+  );
+
+  return response.data;
+};
 
 

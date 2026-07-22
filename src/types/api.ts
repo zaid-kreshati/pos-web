@@ -21,6 +21,8 @@ export interface CreateInvoiceResponse extends ApiResponse {
   data: {
     uuid: string;
     nfc_url: string;
+    invoice_url: string;
+    pos_device: { id: number; name: string };
   };
 }
 

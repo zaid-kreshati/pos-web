@@ -2,6 +2,7 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.electronicinvoice.store/api';
 export const DEFAULT_POS_API_TOKEN = 'bb7f835441b0dd38083386a6b1feaf48';
 export const POS_API_TOKEN = import.meta.env.VITE_POS_API_TOKEN || DEFAULT_POS_API_TOKEN;
+export const PUBLIC_APP_URL = (import.meta.env.VITE_PUBLIC_APP_URL || window.location.origin).replace(/\/$/, '');
 
 // Local NFC bridge running on the POS device (writes the tag over USB).
 export const NFC_BRIDGE_URL = import.meta.env.VITE_NFC_BRIDGE_URL || 'http://127.0.0.1:9000';
@@ -15,6 +16,7 @@ export const ENDPOINTS = {
   INVOICES: {
     CREATE: '/invoices',
     LIST: '/invoices/all',
+    PUBLIC_BY_UUID: (uuid: string) => `/public/invoices/${uuid}`,
   },
 
   PRODUCTS: {

@@ -11,6 +11,7 @@ import { writeToTag } from "../api/nfcBridge";
 import type { BridgeWriteResult } from "../api/nfcBridge";
 import { formatNumber } from "../utils/formatters";
 import { DEFAULT_CURRENCY } from "../utils/constants";
+import { PUBLIC_APP_URL } from "../utils/constants";
 import { Copy, Check, Info, Send, ChevronLeft, ShoppingCart, FileText, Bell, Nfc, AlertTriangle, Loader2 } from "lucide-react";
 
 type NfcStatus = "idle" | "writing" | "success" | "error";
@@ -37,6 +38,7 @@ export const InvoiceForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdUuid, setCreatedUuid] = useState<string | null>(null);
   const [nfcUrl, setNfcUrl] = useState<string | null>(null);
+  const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
   const [nfcStatus, setNfcStatus] = useState<NfcStatus>("idle");
   const [nfcError, setNfcError] = useState<string | null>(null);
   const [copiedToClipboard, setCopiedToClipboard] = useState(false);
@@ -105,6 +107,7 @@ export const InvoiceForm: React.FC = () => {
       const url = response.data.nfc_url ?? `casher://nfc?uuid=${response.data.uuid}`;
       setCreatedUuid(response.data.uuid);
       setNfcUrl(url);
+      setInvoiceUrl(response.data.invoice_url ?? `${PUBLIC_APP_URL}/invoice/${response.data.uuid}`);
       addToast(
         `تم إنشاء الفاتورة بنجاح! UUID: ${response.data.uuid}`,
         "success",
@@ -180,6 +183,19 @@ export const InvoiceForm: React.FC = () => {
             </div>
           </div>
 
+          {invoiceUrl && (
+            <div className="bg-white rounded-xl p-4 mb-6 inline-flex flex-col items-center gap-3">
+              <img
+                className="w-40 h-40"
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(invoiceUrl)}`}
+                alt="QR code for this invoice"
+              />
+              <a href={invoiceUrl} target="_blank" rel="noreferrer" className="text-sm text-green-700 break-all max-w-xs">
+                عرض الفاتورة عبر QR
+              </a>
+            </div>
+          )}
+
           {/* NFC write status */}
           <div className="mb-6">
             {nfcStatus === "writing" && (
@@ -216,6 +232,7 @@ export const InvoiceForm: React.FC = () => {
               onClick={() => {
                 setCreatedUuid(null);
                 setNfcUrl(null);
+                setInvoiceUrl(null);
                 setNfcStatus("idle");
                 setNfcError(null);
               }}

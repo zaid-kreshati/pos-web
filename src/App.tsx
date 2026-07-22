@@ -7,6 +7,7 @@ import { useAuth } from './hooks/useAuth';
 import { LoginPage } from './pages/LoginPage';
 import { CreateInvoicePage } from './pages/CreateInvoicePage';
 import { InvoiceListPage } from './pages/InvoiceListPage';
+import { PublicInvoicePage } from './pages/PublicInvoicePage';
 
 // Protected route component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -38,6 +39,7 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/invoice/:uuid" element={<PublicInvoicePage />} />
       <Route
         path="/invoices"
         element={
